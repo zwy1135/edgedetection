@@ -6,11 +6,13 @@
 using namespace std;
 using namespace cv;
 
-void set_color(IplImage* img);
+IplImage* set_color(IplImage* img);
+void findLines(IplImage* buf,IplImage* src);
 
 int main()
 {
 	IplImage* pImg = NULL;
+	IplImage* buf = NULL;
 	IplImage* greenImg = NULL;
 	IplImage* pCannyImg = NULL;
 	string filename;
@@ -27,15 +29,15 @@ int main()
 			if(0 != (pImg = cvLoadImage(cp,1)))
 			{
 				cvShowImage("src",pImg);
-				set_color(pImg);
+				buf = set_color(pImg);
 				greenImg = cvCreateImage(cvGetSize(pImg),IPL_DEPTH_8U,1);
-				cvSetImageCOI(pImg,2);
-				cvCopy(pImg,greenImg);
-				cvResetImageROI(pImg);
+				cvSetImageCOI(buf,2);
+				cvCopy(buf,greenImg);
+				cvResetImageROI(buf);
 				pCannyImg = cvCreateImage(cvGetSize(pImg),IPL_DEPTH_8U,1);
 				cvCanny(greenImg,pCannyImg,50,154,3);
-				
-				cvShowImage("edge",pCannyImg);
+				findLines(pCannyImg,pImg);
+				//cvShowImage("edge",pCannyImg);
 				//cvNamedWindow("src",1);
 				//cvNamedWindow("edge",1);
 				
@@ -44,6 +46,7 @@ int main()
 				cvDestroyWindow("src");
 				cvDestroyWindow("edge");
 				cvReleaseImage(&pImg);
+				cvReleaseImage(&buf);
 				cvReleaseImage(&greenImg);
 				cvReleaseImage(&pCannyImg);
 			}
@@ -52,14 +55,15 @@ int main()
 	 
 }
 
-void set_color(IplImage* img)
+IplImage* set_color(IplImage* img)
 {
+	IplImage* buf = cvCloneImage(img);
 	CvSize size = cvGetSize(img);
 	int height = size.height;
 	int width = size.width;
 	for(int y=0;y<height;y++)
 	{
-		 uchar* ptr = (uchar*) (img->imageData + y * img->widthStep);
+		 uchar* ptr = (uchar*) (buf->imageData + y * buf->widthStep);
 		 for(int x=0;x<width;x++)
 		 {
 			 if(!(ptr[3*x]<10&&ptr[3*x+1]>250&&ptr[3*x+2]<10))
@@ -70,4 +74,30 @@ void set_color(IplImage* img)
 			 }
 		 }
 	}
+	return buf;
+}
+
+void findLines(IplImage* buf,IplImage* src)
+{
+	CvMemStorage* stor = cvCreateMemStorage(0);
+	CvSeq* lines;
+	lines = cvHoughLines2(buf,stor,CV_HOUGH_PROBABILISTIC,1,CV_PI/180,70,100,200);
+	for(int i = 0; i < MIN(lines->total,50); i++ )
+	{
+        CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
+        cvLine( src, line[0], line[1], CV_RGB(255,0,0), 1, 8, 0 );
+     }
+	cvShowImage("edge",src);
+//	vector<Vec4i> lines;
+//	Mat Mbuf = Mat(buf);
+//	HoughLinesP(Mbuf,lines,1,CV_PI/180,30,10,101);
+//	//cvHoughLines2(buf,lines,CV_HOUGH_PROBABILISTIC,1,CV_PI/180,80,30,100);
+//	vector<Vec4i>::const_iterator it = lines.begin();
+//	while(it!=lines.end())
+//	{
+//		Point pt1((*it)[0],(*it)[1]);
+//		Point pt2((*it)[2],(*it)[3]);
+//		cvLine(buf,pt1,pt1,Scalar(0,0,255));
+//	}
+//	cvShowImage("edge",buf);
 }
