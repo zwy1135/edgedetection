@@ -86,7 +86,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="源.cpp" />
+    <ClCompile Include="源1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="filelist.txt" />

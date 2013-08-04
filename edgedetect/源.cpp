@@ -8,6 +8,7 @@ using namespace cv;
 
 IplImage* set_color(IplImage* img);
 void findLines(IplImage* buf,IplImage* src);
+void findedge(IplImage* buf,IplImage* src);
 
 int main()
 {
@@ -29,22 +30,25 @@ int main()
 			if(0 != (pImg = cvLoadImage(cp,1)))
 			{
 				cvShowImage("src",pImg);
+				cout<<pImg->origin<<endl;
 				buf = set_color(pImg);
 				greenImg = cvCreateImage(cvGetSize(pImg),IPL_DEPTH_8U,1);
 				cvSetImageCOI(buf,2);
 				cvCopy(buf,greenImg);
 				cvResetImageROI(buf);
+				cvSmooth(greenImg,greenImg,CV_GAUSSIAN,17);
 				pCannyImg = cvCreateImage(cvGetSize(pImg),IPL_DEPTH_8U,1);
 				cvCanny(greenImg,pCannyImg,50,154,3);
-				findLines(pCannyImg,pImg);
-				//cvShowImage("edge",pCannyImg);
+				findedge(pCannyImg,pImg);
+				//cvShowImage("green",pCannyImg);
 				//cvNamedWindow("src",1);
 				//cvNamedWindow("edge",1);
 				
 				cvWaitKey(0);
 				
-				cvDestroyWindow("src");
-				cvDestroyWindow("edge");
+				cvDestroyAllWindows();
+				//cvDestroyWindow("src");
+				//cvDestroyWindow("edge");
 				cvReleaseImage(&pImg);
 				cvReleaseImage(&buf);
 				cvReleaseImage(&greenImg);
@@ -75,6 +79,20 @@ IplImage* set_color(IplImage* img)
 		 }
 	}
 	return buf;
+}
+
+void findedge(IplImage* buf,IplImage* src)
+{
+	CvMemStorage* stor = cvCreateMemStorage(0);
+	CvSeq* edge;
+	cvFindContours(buf,stor,&edge,sizeof(CvContour),CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE);
+	cvDrawContours(src,edge,CV_RGB(255,0,0),CV_RGB(0,0,0),0,CV_FILLED);
+	/*for(int i = 0; i < MIN(edge->total,50); i++ )
+	{
+        CvPoint* line = (CvPoint*)cvGetSeqElem(edge,i);
+        cvLine( src, line[0], line[1], CV_RGB(255,0,0), 1, 8, 0 );
+     }*/
+	cvShowImage("edge",src);
 }
 
 void findLines(IplImage* buf,IplImage* src)
