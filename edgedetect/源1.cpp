@@ -11,6 +11,7 @@ using namespace cv;
 
 void findEdgePoint(vector<Point> &left,vector<Point> &right,IplImage* img);
 void showpoint(vector<Point> p);
+void draw(IplImage* img,Vec4f line);
 
 int main()
 {
@@ -18,6 +19,7 @@ int main()
 	string filename;
 	ifstream reader;
 	vector<Point> left,right;
+	Vec4f leftLine,rightLine;
 
 	reader.open("filelist.txt");
 	if(reader.is_open())
@@ -37,7 +39,14 @@ int main()
 				showpoint(left);
 				cout<<"Right point:";
 				showpoint(right);
-
+				fitLine(Mat(left),leftLine,CV_DIST_L2,0,0.01,0.01);
+				fitLine(Mat(right),rightLine,CV_DIST_L2,0,0.01,0.01);
+				//cout<<leftLine[3]<<endl;
+				//cvLine(pImg,cvPoint(leftLine[0],leftLine[1]),cvPoint(leftLine[2],leftLine[3]),Scalar(0,0,255));
+				//cvLine(pImg,cvPoint(rightLine[0],rightLine[1]),cvPoint(rightLine[2],rightLine[3]),Scalar(0,0,255));
+				draw(pImg,leftLine);
+				draw(pImg,rightLine);
+				cvShowImage("line",pImg);
 
 				cvWaitKey();
 				cvDestroyAllWindows();
@@ -56,14 +65,14 @@ void findEdgePoint(vector<Point> &left,vector<Point> &right,IplImage* img)
 {
 	int height = img->height;
 	int width = img->width;
-	int leftpoint;
-	int rightpoint;
+	int leftpoint = width;
+	int rightpoint = 0;
 
 
-	for(int y=0;y<height;y+=10)
+
+	for(int y=0;y<height;y++)
 	{
-		leftpoint = width;
-		rightpoint = 0;
+		
 		uchar* ptr = (uchar*)(img->imageData+y*img->widthStep);
 		for(int x=0;x<leftpoint;x++)
 		{
@@ -72,6 +81,7 @@ void findEdgePoint(vector<Point> &left,vector<Point> &right,IplImage* img)
 				//TODO:add point.
 				left.push_back(Point(x,y));
 				leftpoint = x;
+				cout<<leftpoint<<endl;
 				break;
 			}
 		}
@@ -100,3 +110,22 @@ void showpoint(vector<Point> p)
 	}
 	cout<<endl;
 }
+
+
+
+void draw(IplImage* img,Vec4f line)
+{
+	double k,b;
+	k = line[1]/line[0];
+	b = line[3]-line[2]*k;
+	int x0 = 0;
+	int y0 = k*x0+b;
+	int x1 = img->width;
+	int y1 = k*x1+b;
+	cvLine(img,cvPoint(x0,y0),cvPoint(x1,y1),Scalar(0,0,255));
+	//cout<<"line[0]="<<line[0]<<"line[1]="<<line[1]<<"line[2]="<<line[2]<<"line[3]="<<line[3]<<endl;
+	cout<<"x1="<<x1<<"y1="<<y1<<"x0="<<x0<<"y0="<<y0<<endl;
+	//cout<<"k="<<k<<" b="<<b<<endl;
+}
+
+
