@@ -6,7 +6,7 @@ using namespace cv;
 void findEdgePoint(vector<Point> &left,vector<Point> &right,IplImage* img);//从上到下扫描图像并找出边缘点
 void showpoint(vector<Point> p);//显示边缘点
 void draw(IplImage* img,Vec4f line);//画出边线
-void draw(IplImage* img,vecs vec);
+void draw(IplImage* img,vecs vec,int terminal,char flag);
 
 int main()
 {
@@ -39,15 +39,23 @@ int main()
 				cout<<"Right point:";
 				showpoint(right);
 				cout<<endl<<endl<<endl;
-
-				left2 = geneticoptimize(left);
-				right2 = geneticoptimize(right);
-
 				//拟合并绘制
+				if(left.size()>2)
+				{
+					left2 = geneticoptimize(left);
+					draw(pImg,left2,left[0].x,'l');
+				}
+				if(right.size()>2)
+				{
+					right2 = geneticoptimize(right);
+					draw(pImg,right2,right[0].x,'r');
+				}
+				
+
+				
 				//fitLine(Mat(left),leftLine,CV_DIST_L2,0,0.01,0.01);
 				//fitLine(Mat(right),rightLine,CV_DIST_L2,0,0.01,0.01);
-				draw(pImg,left2);
-				draw(pImg,right2);
+				
 				cvShowImage("line",pImg);
 
 				cvWaitKey();
@@ -138,7 +146,7 @@ void draw(IplImage* img,Vec4f line)
 	cvLine(img,cvPoint(x0,y0),cvPoint(x1,y1),Scalar(0,0,255),3);
 }
 
-void draw(IplImage* img,vecs vec)
+void draw(IplImage* img,vecs vec,int terminal,char flag)
 {
 	int width = img->width;
 	int x,y1,y2;
@@ -149,17 +157,30 @@ void draw(IplImage* img,vecs vec)
 	double c1 = vec.vec[4];
 	double d1 = vec.vec[5]; 
 	double r;
-	for(x=0;x<width;x++)
+	if(flag == 'l')
 	{
-		r = -(a1*x*x*x+b1*x*x+c1*x+d1);
-		//a*y^2 +b*y +r = 0
-		y1 = -b+sqrt(b*b-4*a*r)/(2*a);
-		y2 = -b-sqrt(b*b - 4*a*r)/(2*a);
-		//y2 = -r/b;
-		cvCircle(img,cvPoint(x,y1),1,Scalar(0,0,255));
-		cvCircle(img,cvPoint(x,y2),1,Scalar(0,0,255));
+		for(x=0;x<terminal;x++)
+		{
+			r = -(a1*x*x*x+b1*x*x+c1*x+d1);
+			//a*y^2 +b*y +r = 0
+			//y1 = -b+sqrt(b*b-4*a*r)/(2*a);
+			y2 = -b-sqrt(b*b - 4*a*r)/(2*a);
+			//y2 = -r/b;
+			//cvCircle(img,cvPoint(x,y1),1,Scalar(0,0,255));
+			cvCircle(img,cvPoint(x,y2),1,Scalar(0,0,255));
 
+		}
 	}
+	else
+	{
+		for(x = terminal;x<width;x++)
+		{
+			r = -(a1*x*x*x+b1*x*x+c1*x+d1);
+			y1 = -b+sqrt(b*b-4*a*r)/(2*a);
+			cvCircle(img,cvPoint(x,y1),1,Scalar(0,0,255));
+		}
+	}
+	
 }
 
 

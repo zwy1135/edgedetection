@@ -69,16 +69,17 @@ vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mut
 		if(oldscore>calError(pop[0].vec,points))
 		{
 			oldscore = calError(pop[0].vec,points);
-			samecount ++;
+			samecount = 0;
 		}
 		else
-			samecount = 0;
+			samecount ++;
+			
 		///*if(!(i%100))
 		//{
 		//	cout<<i<<" times,score= "<<oldscore<<endl;
 		//	cout<<pop[0].cost<<" "<<pop[1].cost<<endl;
 		//}*/
-		if(samecount>200)break;
+		if(samecount>20)break;
 		vector<vecs> newpop;
 		for(int j=0;j<totallite;j++)
 		{
