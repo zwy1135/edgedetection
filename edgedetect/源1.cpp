@@ -1,25 +1,22 @@
-﻿#include"opencv2/opencv.hpp"
-#include"iostream"
-#include "string.h"
-#include "fstream"
+﻿#include "head.h"
 
-#include "string.h"
-#include "fstream"
-
-using namespace std;
+//using namespace std;
 using namespace cv;
 
 void findEdgePoint(vector<Point> &left,vector<Point> &right,IplImage* img);//从上到下扫描图像并找出边缘点
 void showpoint(vector<Point> p);//显示边缘点
 void draw(IplImage* img,Vec4f line);//画出边线
+void draw(IplImage* img,vecs vec);
 
 int main()
 {
+	srand((unsigned) time(NULL));
 	IplImage* pImg;
 	string filename;
 	ifstream reader;
 	vector<Point> left,right;
 	Vec4f leftLine,rightLine;
+	vecs left2,right2;
 
 	reader.open("filelist.txt");		//读取图片路径
 	if(reader.is_open())
@@ -43,15 +40,18 @@ int main()
 				showpoint(right);
 				cout<<endl<<endl<<endl;
 
-				//拟合直线并绘制
-				fitLine(Mat(left),leftLine,CV_DIST_L2,0,0.01,0.01);
-				fitLine(Mat(right),rightLine,CV_DIST_L2,0,0.01,0.01);
-				draw(pImg,leftLine);
-				draw(pImg,rightLine);
+				left2 = geneticoptimize(left);
+				right2 = geneticoptimize(right);
+
+				//拟合并绘制
+				//fitLine(Mat(left),leftLine,CV_DIST_L2,0,0.01,0.01);
+				//fitLine(Mat(right),rightLine,CV_DIST_L2,0,0.01,0.01);
+				draw(pImg,left2);
+				draw(pImg,right2);
 				cvShowImage("line",pImg);
 
 				cvWaitKey();
-				cvDestroyAllWindows();
+				//cvDestroyAllWindows();
 				cvReleaseImage(&pImg);
 			}
 			else
@@ -136,6 +136,30 @@ void draw(IplImage* img,Vec4f line)
 	int x1 = img->width;
 	int y1 = k*x1+b;
 	cvLine(img,cvPoint(x0,y0),cvPoint(x1,y1),Scalar(0,0,255),3);
+}
+
+void draw(IplImage* img,vecs vec)
+{
+	int width = img->width;
+	int x,y1,y2;
+	double a = vec.vec[0];
+	double b = vec.vec[1];
+	double a1 = vec.vec[2];
+	double b1 = vec.vec[3];
+	double c1 = vec.vec[4];
+	double d1 = vec.vec[5]; 
+	double r;
+	for(x=0;x<width;x++)
+	{
+		r = -(a1*x*x*x+b1*x*x+c1*x+d1);
+		//a*y^2 +b*y +r = 0
+		y1 = -b+sqrt(b*b-4*a*r)/(2*a);
+		y2 = -b-sqrt(b*b - 4*a*r)/(2*a);
+		//y2 = -r/b;
+		cvCircle(img,cvPoint(x,y1),1,Scalar(0,0,255));
+		cvCircle(img,cvPoint(x,y2),1,Scalar(0,0,255));
+
+	}
 }
 
 

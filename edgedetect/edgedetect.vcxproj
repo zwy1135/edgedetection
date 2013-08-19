@@ -86,10 +86,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="optimize.cpp" />
     <ClCompile Include="源1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="filelist.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="head.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
