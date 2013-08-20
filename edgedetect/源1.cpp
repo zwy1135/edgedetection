@@ -58,7 +58,7 @@ int main()
 				
 				cvShowImage("line",pImg);
 
-				cvWaitKey();
+				cvWaitKey(100);
 				//cvDestroyAllWindows();
 				cvReleaseImage(&pImg);
 			}
@@ -77,39 +77,44 @@ void findEdgePoint(vector<Point> &left,vector<Point> &right,IplImage* img)
 	int width = img->width;
 	int leftpoint = width;
 	int rightpoint = 0;
+	bool lflag = true,rflag = true;
 
 
 
-	for(int y=0;y<height;y+= 10)
+	for(int y=0;y<height;y+= 5)
 	{
 		
 		uchar* ptr = (uchar*)(img->imageData+y*img->widthStep);
 		//扫描左侧边缘
-		for(int x=0;x<leftpoint;x++)
+		for(int x=0;lflag&&x<leftpoint+20;x++)
 		{
 			if(ptr[3*x]<10&&ptr[3*x+1]>250&&ptr[3*x+2]<10)
 			{
-				if(leftpoint-x>80)
+				if(leftpoint-x>50||x-leftpoint>10)
 				{
 					left.clear();
 				}
 				left.push_back(Point(x,y));
 				leftpoint = x;
+				if(leftpoint == 0)
+					lflag = false;
 				break;
 			}
 		}
 
 		//扫描右侧边缘
-		for(int x=width-1;x>rightpoint;x--)
+		for(int x=width-1;rflag&&x>rightpoint-20;x--)
 		{
 			if(ptr[3*x]<10&&ptr[3*x+1]>250&&ptr[3*x+2]<10)
 			{
-				if(x-rightpoint>80)
+				if(x-rightpoint>50||rightpoint-x>10)
 				{
 					right.clear();
 				}
 				right.push_back(Point(x,y));
 				rightpoint = x;
+				if(rightpoint == width-1)
+					rflag = false;
 				break;
 			}
 		}

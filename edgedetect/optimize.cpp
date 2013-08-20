@@ -1,9 +1,9 @@
-#include"head.h"
+﻿#include"head.h"
 
 //using namespace std;
 //using namespace cv;
 
-double calError(double vec[],vector<cv::Point> points)
+double calError(double vec[],vector<cv::Point> points)//误差计算
 {
 	double sum = 0.0;
 	double x,y;
@@ -25,8 +25,6 @@ double calError(double vec[],vector<cv::Point> points)
 		//a*y^2 +b*y +r = 0
 		y1 = -b+sqrt(b*b-4*a*r)/(2*a);
 		y2 = -b-sqrt(b*b - 4*a*r)/(2*a);
-		//y1 = -r/b;
-		//y2 = -r/b;
 		if(fabs(y-y1)<fabs(y-y2))
 		{
 			sum += fabs(y-y1)*fabs(y-y1);
@@ -35,19 +33,17 @@ double calError(double vec[],vector<cv::Point> points)
 		{
 			sum += fabs(y-y2)*fabs(y-y2);
 		}
-		//sum += fabs(y-y2)*fabs(y-y2);
 	}
 	return sqrt(sum);
 }
 
 
 
-vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mutprob,double elite,int maxiter)
+vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mutprob,double elite,int maxiter) //遗传算法本体
 {
 	
 	vector<vecs> pop;
 	vecs vec;
-	// firstvec;
 	int samecount = 0;
 	double oldscore = 9999999999;
 	for(int i = 0;i<popsize;i++)
@@ -74,11 +70,7 @@ vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mut
 		else
 			samecount ++;
 			
-		///*if(!(i%100))
-		//{
-		//	cout<<i<<" times,score= "<<oldscore<<endl;
-		//	cout<<pop[0].cost<<" "<<pop[1].cost<<endl;
-		//}*/
+		
 		if(samecount>20)break;
 		vector<vecs> newpop;
 		for(int j=0;j<totallite;j++)
@@ -88,17 +80,14 @@ vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mut
 		while(newpop.size()<popsize)
 		{
 			double t = randf();
-			//cout<<"t= "<<t<<endl;
 			if(t<mutprob)
 			{
-				//cout<<'*';
 				int j = rand()%newpop.size();
 				newpop.push_back(mutate(newpop[j],step,points));
 
 			}
 			else
 			{
-				//cout<<'.';
 				int j = rand()%newpop.size();
 				int k = rand()%newpop.size();
 				newpop.push_back(crossover(newpop[j],newpop[k],points));
@@ -107,11 +96,6 @@ vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mut
 		pop = newpop;
 	}
 	vec = pop[0];
-	/*for(int i=0;i<6;i++)
-	{
-		cout<<vec.vec[i]<<' ';
-	}
-	cout<<endl;*/
 	cout<<"a= "<<vec.vec[0]<<" b= "<<vec.vec[1]<<" a1= "<<vec.vec[2]<<" b1= "<<vec.vec[3]<<" c1="<<vec.vec[4]<<" d1= "<<vec.vec[5]<<endl;
 	cout<<"final error: "<<vec.cost<<endl;
 	return vec;
@@ -119,7 +103,7 @@ vecs geneticoptimize(vector<cv::Point> points,int popsize,double step,double mut
 }
 
 
-vecs mutate(vecs vec,double step,vector<cv::Point> points)
+vecs mutate(vecs vec,double step,vector<cv::Point> points)  //变异
 {
 	
 	int i =rand() % 6;
@@ -128,7 +112,7 @@ vecs mutate(vecs vec,double step,vector<cv::Point> points)
 	return vec;
 }
 
-vecs crossover(vecs vec1,vecs vec2,vector<cv::Point> points)
+vecs crossover(vecs vec1,vecs vec2,vector<cv::Point> points)  //杂交
 {
 	
 	vecs vec;
@@ -145,12 +129,9 @@ vecs crossover(vecs vec1,vecs vec2,vector<cv::Point> points)
 }
 
 
-double randf() 
+double randf() //随机小数发生
 { 
-	
-	int t = rand();
-	//cout<<"t="<<t<<endl;
-    return (double)(t/(double)RAND_MAX); 
+    return (double)(rand()/(double)RAND_MAX); 
 } 
 
 bool mycmp(vecs vec1,vecs vec2)
